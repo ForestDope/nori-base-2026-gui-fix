@@ -1,0 +1,172 @@
+**Homework 5: Differentiable Triangle Soup**
+
+Student name:
+
+Sciper number:
+
+Triangle Window Function (25 points)
+====================================
+
+Describe your implementation of `TriangleModel._window_function` in
+`trianglesoup/rendering/triangle_model.py`, and briefly explain why we
+need the window function here.
+
+Validation
+----------
+
+Comparisons between your render (left) and the provided reference
+(right) for each of the five single-triangle test cases.  All cases
+should pass `pixi run validate-part1`.
+
+Copy the five student renders from `output/validation/part1/*.png`
+into this folder so the sliders below can display them.
+
+<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; align-items: start;">
+    <div>
+        <p style="text-align: center; margin: 0 0 4px 0;">σ = 1, occ = 1</p>
+        <div class="twentytwenty-container">
+            <img src="sigma_1_occ_1-ref.png" alt="Reference">
+            <img src="sigma_1_occ_1.png" alt="Mine">
+        </div>
+    </div>
+    <div>
+        <p style="text-align: center; margin: 0 0 4px 0;">σ = 5, occ = 1</p>
+        <div class="twentytwenty-container">
+            <img src="sigma_5_occ_1-ref.png" alt="Reference">
+            <img src="sigma_5_occ_1.png" alt="Mine">
+        </div>
+    </div>
+    <div>
+        <p style="text-align: center; margin: 0 0 4px 0;">σ = 10, occ = 1</p>
+        <div class="twentytwenty-container">
+            <img src="sigma_10_occ_1-ref.png" alt="Reference">
+            <img src="sigma_10_occ_1.png" alt="Mine">
+        </div>
+    </div>
+    <div>
+        <p style="text-align: center; margin: 0 0 4px 0;">σ = 5, occ = 0.5</p>
+        <div class="twentytwenty-container">
+            <img src="sigma_5_occ_05-ref.png" alt="Reference">
+            <img src="sigma_5_occ_05.png" alt="Mine">
+        </div>
+    </div>
+    <div>
+        <p style="text-align: center; margin: 0 0 4px 0;">σ = 5, occ = 0.2</p>
+        <div class="twentytwenty-container">
+            <img src="sigma_5_occ_02-ref.png" alt="Reference">
+            <img src="sigma_5_occ_02.png" alt="Mine">
+        </div>
+    </div>
+</div>
+
+
+Forward Integrator: Alpha Compositing (30 points)
+=================================================
+
+Describe your implementation of the alpha-compositing loop in
+`TriangleSoupEmissive.sample()`.
+
+Validation
+----------
+
+`pixi run validate-part2` renders the reference cube from a corner
+viewpoint.  The per-pixel difference against the reference should be
+negligible.  Copy `output/validation/part2/corner.png` into this folder
+so the slider below can display it.
+
+<div class="twentytwenty-container" style="width: 100%; max-width: none; height: 650px;">
+    <img src="corner-ref.png" alt="Reference" style="width: 100%; height: 100%; object-fit: contain;">
+    <img src="corner.png" alt="Mine" style="width: 100%; height: 100%; object-fit: contain;">
+</div>
+
+
+Backward Pass: Path Replay Backpropagation (30 points)
+======================================================
+
+Describe your implementation of the PRB backward pass.
+
+Validation
+----------
+
+`pixi run validate-part3` perturbs each differentiable parameter
+(colours, occupancy, σ, vertex positions), backpropagates through your
+integrator, and compares the resulting gradients and per-parameter
+derivative images against pre-generated references.
+
+Include below the derivative comparison figure produced by
+`validate-part3` for at least one triangle of the cube (e.g.
+triangle 11).  The figure is saved as
+`output/validation/part3/comparison_tri<N>.png`; copy it into this
+folder to embed.
+
+<!-- Example: copy output/validation/part3/comparison_tri11.png next to
+     this report and uncomment the line below. -->
+<!-- ![Derivative comparison for triangle 11](part3_comparison_tri11.png) -->
+
+
+Triangle Statistics (15 points)
+===============================
+
+`pixi run validate-part4` should report that pixel counts and average
+contribution weights match the reference.
+
+
+Reconstruction scenes
+=====================
+
+Run end-to-end reconstruction on each of the three datasets.  Pick
+the recipe that fits your machine; **either the full (CUDA) or the
+CPU variant is accepted**:
+
+~~~bash
+# Full (CUDA) variants: best quality, need an NVIDIA GPU.
+pixi run train-fox
+pixi run train-macaw
+pixi run train-lego
+
+# CPU variants: ~5 minutes each on a multi-core CPU.
+pixi run train-fox-cpu
+pixi run train-macaw-cpu
+pixi run train-lego-cpu
+~~~
+
+Each run writes a `progress_grid.png` to `output/<experiment-name>/`.
+Copy that single image per scene into this folder and include it
+below.
+
+Fox:
+
+<!-- ![Fox progress grid](fox_progress.png) -->
+
+Macaw:
+
+<!-- ![Macaw progress grid](macaw_progress.png) -->
+
+Lego bulldozer:
+
+<!-- ![Lego progress grid](lego_progress.png) -->
+
+
+Feedback
+========
+
+We would appreciate any comments or criticism to improve the projects
+in future years; naturally, this part will not be graded.  Examples
+of useful information:
+
+* How much time did you spend on the assignment?  How was it divided
+  between designing, coding, and testing?
+* What advice should we have given you before you started?
+* What was hard or surprising about the assignment?
+* What did you like or dislike?  What else would you change?
+
+<!-- Slider -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="../resources/jquery.event.move.js"></script>
+<script src="../resources/jquery.twentytwenty.js"></script>
+<link href="../resources/offcanvas.css" rel="stylesheet">
+<link href="../resources/twentytwenty.css" rel="stylesheet" type="text/css" />
+<script>var markdeepOptions = {onLoad: function() {$(".twentytwenty-container").twentytwenty({default_offset_pct: 0.5, move_slider_on_hover: true});} };</script>
+<!-- Markdeep: -->
+<script src="https://morgan3d.github.io/markdeep/latest/markdeep.min.js?" charset="utf-8"></script>
+<script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
