@@ -1,0 +1,203 @@
+[workspace]
+name = "trianglesoup"
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-arm64", "osx-64", "win-64"]
+
+[dependencies]
+python = ">=3.10,<3.13"
+numpy = "*"
+pytest = ">=9.0.3,<10"
+
+[pypi-dependencies]
+mitsuba = "*"
+tqdm = "*"
+matplotlib = "*"
+
+trianglesoup = { path = ".", editable = true }
+
+# ---------------------------------------------------------------------------
+# Tasks
+# ---------------------------------------------------------------------------
+
+[tasks]
+# Generate the cube test fixture (small, fast).
+make-cube-dataset = "python data/generate_cube_dataset.py"
+
+# Orbit-render 32 train + 8 test views around the fox (fully surrounding
+# the model). Deterministic Fibonacci sphere — same poses every run.
+make-fox-dataset = """python data/generate_dataset.py \
+    --scene data/scenes/fox/scene.xml \
+    --output data/datasets/fox \
+    --train-cameras 32 --test-cameras 8 \
+    --resolution 1024 --spp 256 \
+    --min-elevation -80 --max-elevation 80"""
+
+# Orbit-render 32 train + 8 test views around the macaw.
+make-macaw-dataset = """python data/generate_dataset.py \
+    --scene data/scenes/macaw/scene.xml \
+    --output data/datasets/macaw \
+    --train-cameras 32 --test-cameras 8 \
+    --resolution 1024 --spp 256 \
+    --min-elevation -80 --max-elevation 80"""
+
+# Orbit-render the lego bulldozer. Mirrors the original generator defaults:
+# top-hemisphere orbit (10°..80°) and 1024 spp — the scene sits on a floor
+# plane, so full-sphere coverage would waste samples on the ground.
+make-lego-dataset = """python data/generate_dataset.py \
+    --scene data/scenes/lego/scene.xml \
+    --output data/datasets/lego"""
+
+# Regenerate every dataset in one shot (cube + lego + fox + macaw).
+make-datasets = { depends-on = ["make-cube-dataset", "make-lego-dataset", "make-fox-dataset", "make-macaw-dataset"] }
+
+# Validate homework parts (renders + diagnostics).
+validate-part1 = "python -m trianglesoup.validate 1"
+validate-part2 = "python -m trianglesoup.validate 2"
+validate-part3 = "python -m trianglesoup.validate 3"
+validate-part4 = "python -m trianglesoup.validate 4"
+validate = { depends-on = ["validate-part1", "validate-part2", "validate-part3", "validate-part4"] }
+
+# Train on the lego dataset (tuned for 3000-iter convergence).
+train-lego = """python -m trianglesoup.train \
+    data/datasets/lego \
+    --mesh-init data/scenes/lego/scene.xml \
+    --mesh-init-triangles 25000 \
+    --iterations 3000 --log-interval 100 \
+    --mini-batch-pixels 500000 \
+    --jitter-pixels \
+    --primal-spp 4 \
+    --learning-rate 0.002 \
+    --learning-rate-decay-step 350 \
+    --learning-rate-decay-rate 0.65 \
+    --learning-rate-min 2e-5 \
+    --pruning-step 200 \
+    --pruning-min-area 5e-7 \
+    --pruning-max-aspect-ratio 8.0 \
+    --pruning-occupancy-threshold 0.02 \
+    --densification-step 200 \
+    --densification-budget-ratio 0.10 \
+    --max-triangles 180000 \
+    --loss-occupancy-weight 0.0055 \
+    --loss-size-weight 1e-8 \
+    --progress-view 074f567ed1 \
+    --output-dir output --experiment-name lego \
+    --render-final --final-render-spp 32"""
+
+# CPU-friendly lego training (~4 min on 32-core CPU, llvm_ad_rgb).
+train-lego-cpu = """python -m trianglesoup.train \
+    data/datasets/lego \
+    --mesh-init data/scenes/lego/scene.xml \
+    --mesh-init-triangles 8000 \
+    --iterations 200 --log-interval 100 \
+    --mini-batch-pixels 150000 \
+    --jitter-pixels \
+    --primal-spp 1 \
+    --learning-rate 0.003 \
+    --learning-rate-decay-step 120 \
+    --learning-rate-decay-rate 0.7 \
+    --learning-rate-min 3e-5 \
+    --pruning-step 0 \
+    --densification-step 0 \
+    --max-triangles 40000 \
+    --loss-occupancy-weight 0.0055 \
+    --loss-size-weight 1e-8 \
+    --progress-view 074f567ed1 \
+    --output-dir output --experiment-name lego-cpu \
+    --render-final --final-render-spp 8"""
+
+# Train on the knitted-fox 3MF scene (tuned for 3000-iter convergence).
+train-fox = """python -m trianglesoup.train \
+    data/datasets/fox \
+    --mesh-init data/scenes/fox/scene.xml \
+    --mesh-init-triangles 25000 \
+    --iterations 3000 --log-interval 100 \
+    --mini-batch-pixels 500000 \
+    --jitter-pixels \
+    --primal-spp 4 \
+    --learning-rate 0.002 \
+    --learning-rate-decay-step 350 \
+    --learning-rate-decay-rate 0.65 \
+    --learning-rate-min 2e-5 \
+    --pruning-step 200 \
+    --pruning-min-area 5e-7 \
+    --pruning-max-aspect-ratio 8.0 \
+    --pruning-occupancy-threshold 0.02 \
+    --densification-step 200 \
+    --densification-budget-ratio 0.10 \
+    --max-triangles 180000 \
+    --loss-occupancy-weight 0.0055 \
+    --loss-size-weight 1e-8 \
+    --progress-view 8455107cf5 \
+    --output-dir output --experiment-name fox \
+    --render-final --final-render-spp 32"""
+
+# Train on the macaw 3MF scene (same tuned config as fox).
+train-macaw = """python -m trianglesoup.train \
+    data/datasets/macaw \
+    --mesh-init data/scenes/macaw/scene.xml \
+    --mesh-init-triangles 25000 \
+    --iterations 3000 --log-interval 100 \
+    --mini-batch-pixels 500000 \
+    --jitter-pixels \
+    --primal-spp 4 \
+    --learning-rate 0.002 \
+    --learning-rate-decay-step 350 \
+    --learning-rate-decay-rate 0.65 \
+    --learning-rate-min 2e-5 \
+    --pruning-step 200 \
+    --pruning-min-area 5e-7 \
+    --pruning-max-aspect-ratio 8.0 \
+    --pruning-occupancy-threshold 0.02 \
+    --densification-step 200 \
+    --densification-budget-ratio 0.10 \
+    --max-triangles 180000 \
+    --loss-occupancy-weight 0.0055 \
+    --loss-size-weight 1e-8 \
+    --progress-view 4b1ee171b2 \
+    --output-dir output --experiment-name macaw \
+    --render-final --final-render-spp 32"""
+
+# Lightweight CPU variants that fit in ~5 minutes (tested on llvm_ad_rgb,
+# 32-core machine). Sacrifice some texture sharpness for speed: smaller
+# triangle cap and shorter iteration budget with a tighter LR schedule.
+train-fox-cpu = """python -m trianglesoup.train \
+    data/datasets/fox \
+    --mesh-init data/scenes/fox/scene.xml \
+    --mesh-init-triangles 8000 \
+    --iterations 200 --log-interval 100 \
+    --mini-batch-pixels 150000 \
+    --jitter-pixels \
+    --primal-spp 1 \
+    --learning-rate 0.003 \
+    --learning-rate-decay-step 120 \
+    --learning-rate-decay-rate 0.7 \
+    --learning-rate-min 3e-5 \
+    --pruning-step 0 \
+    --densification-step 0 \
+    --max-triangles 40000 \
+    --loss-occupancy-weight 0.0055 \
+    --loss-size-weight 1e-8 \
+    --progress-view 8455107cf5 \
+    --output-dir output --experiment-name fox-cpu \
+    --render-final --final-render-spp 8"""
+
+train-macaw-cpu = """python -m trianglesoup.train \
+    data/datasets/macaw \
+    --mesh-init data/scenes/macaw/scene.xml \
+    --mesh-init-triangles 8000 \
+    --iterations 200 --log-interval 100 \
+    --mini-batch-pixels 150000 \
+    --jitter-pixels \
+    --primal-spp 1 \
+    --learning-rate 0.003 \
+    --learning-rate-decay-step 120 \
+    --learning-rate-decay-rate 0.7 \
+    --learning-rate-min 3e-5 \
+    --pruning-step 0 \
+    --densification-step 0 \
+    --max-triangles 40000 \
+    --loss-occupancy-weight 0.0055 \
+    --loss-size-weight 1e-8 \
+    --progress-view 4b1ee171b2 \
+    --output-dir output --experiment-name macaw-cpu \
+    --render-final --final-render-spp 8"""

@@ -1,0 +1,46 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Test/tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Packaging/build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Mitsuba/triangle-soup generated outputs
+output/
+
+# External dependencies (submodules / local builds)
+ext/
+
+# Generated datasets and scene assets
+data/datasets/
+data/scenes/
+data/datasets.zip
+data/scenes.zip
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp

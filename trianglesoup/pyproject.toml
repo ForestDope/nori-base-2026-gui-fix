@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trianglesoup"
+version = "0.1.0"
+description = "Triangle soup inverse rendering with Mitsuba 3"
+requires-python = ">=3.9"
+
+[tool.setuptools.packages.find]
+include = ["trianglesoup*"]
