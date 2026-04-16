@@ -59,10 +59,12 @@ class TriangleSoupEmissive(RBIntegrator):
             radiance[active_escaped] += self.background_color * throughput
             active_next &= si.is_valid()
 
-            # --- Skeleton: returns colour * occupancy of the first hit ----
+            # --- Skeleton: returns colour * occupancy of the first hit,
+            #     plus background where transparent ---
             emission = self.triangle_model.eval_color(si, active_next)
             occupancy = self.triangle_model.get_occupancy(si, active_next)
             radiance[active_next] = occupancy * emission
+            radiance[active_next] += self.background_color * (1.0 - occupancy)
             active_next = mi.Bool(False)
             # -------------------------------------------------------------
 
