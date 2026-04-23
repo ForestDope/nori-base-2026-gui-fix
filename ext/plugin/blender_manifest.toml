@@ -1,0 +1,19 @@
+schema_version = "1.0.0"
+
+id = "io_nori"
+version = "0.2.1"
+name = "Export Nori scenes format"
+tagline = "Export Blender scenes to the Nori renderer XML format"
+maintainer = "Adrien Gruson, Delio Vicini, Tizian Zeltner"
+type = "add-on"
+
+blender_version_min = "4.2.0"
+
+license = [
+    "SPDX:GPL-2.0-or-later",
+]
+
+tags = ["Import-Export"]
+
+[permissions]
+files = "Write exported scene XML and OBJ mesh files to the chosen output directory"

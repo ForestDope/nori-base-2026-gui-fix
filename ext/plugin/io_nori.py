@@ -13,8 +13,8 @@ from mathutils import Matrix
 bl_info = {
     "name": "Export Nori scenes format",
     "author": "Adrien Gruson, Delio Vicini, Tizian Zeltner",
-    "version": (0, 1),
-    "blender": (2, 80, 0),
+    "version": (0, 2),
+    "blender": (4, 0, 0),
     "location": "File > Export > Nori exporter (.xml)",
     "description": "Export Nori scene format (.xml)",
     "warning": "",
@@ -132,9 +132,10 @@ class NoriWriter:
         obj_name = mesh.name + ".obj"
         obj_path = os.path.join(self.working_dir, 'meshes', obj_name)
         mesh.select_set(True)
-        bpy.ops.export_scene.obj(filepath=obj_path, check_existing=False,
-                                    use_selection=True, use_edges=False, use_smooth_groups=False,
-                                    use_materials=False, use_triangles=True, use_mesh_modifiers=True)
+        bpy.ops.wm.obj_export(filepath=obj_path, check_existing=False,
+                              export_selected_objects=True, export_materials=False,
+                              export_triangulated_mesh=True, apply_modifiers=True,
+                              export_smooth_groups=False)
         mesh.select_set(False)
 
         # Add the corresponding entry to the xml
