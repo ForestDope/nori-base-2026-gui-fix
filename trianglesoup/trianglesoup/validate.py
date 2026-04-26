@@ -452,7 +452,7 @@ def _build_single_triangle_scene(integrator_module, tm_module,
     return scene, integrator
 
 
-def _generate_random_soup(seed=123):
+def _generate_random_soup(seed=42):
     """Generate a deterministic random triangle-soup scene.
 
     Returns vertices (V,3), faces (N,3), colors (N,3), occupancy (N,),
