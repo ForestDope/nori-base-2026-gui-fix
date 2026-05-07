@@ -7,7 +7,17 @@
 #include <nanogui/renderpass.h>
 #include <nanogui/texture.h>
 
+#include <algorithm>
+#include <cmath>
+
 NORI_NAMESPACE_BEGIN
+
+static nanogui::Vector2i imageDisplaySize(const nori::Vector2i &size, float pixelRatio) {
+    pixelRatio = std::max(pixelRatio, 1.f);
+    return nanogui::Vector2i(
+        std::max(1, (int) std::ceil(size.x() / pixelRatio)),
+        std::max(1, (int) std::ceil(size.y() / pixelRatio)));
+}
 
 NoriScreen::NoriScreen(const ImageBlock &block)
  : nanogui::Screen(nanogui::Vector2i(block.getSize().x(), block.getSize().y() + 36),
@@ -15,6 +25,10 @@ NoriScreen::NoriScreen(const ImageBlock &block)
    m_block(block) {
     using namespace nanogui;
     inc_ref();
+
+    const int toolbarHeight = 36;
+    m_imageDisplaySize = imageDisplaySize(block.getSize(), m_pixel_ratio);
+    set_size(nanogui::Vector2i(m_imageDisplaySize.x(), m_imageDisplaySize.y() + toolbarHeight));
 
     /* Add some UI elements to adjust the exposure value */
     Widget *panel = new Widget(this);
@@ -29,11 +43,11 @@ NoriScreen::NoriScreen(const ImageBlock &block)
         }
     );
 
-    panel->set_size(nanogui::Vector2i(block.getSize().x(), block.getSize().y()));
+    panel->set_size(nanogui::Vector2i(m_imageDisplaySize.x(), toolbarHeight));
     perform_layout();
 
     panel->set_position(
-        nanogui::Vector2i((m_size.x() - panel->size().x()) / 2, block.getSize().y()));
+        nanogui::Vector2i((m_size.x() - panel->size().x()) / 2, m_imageDisplaySize.y()));
 
     /* Simple gamma tonemapper as a GLSL shader */
 
@@ -119,8 +133,7 @@ void NoriScreen::draw_contents() {
     m_renderPass->resize(framebuffer_size());
     m_renderPass->begin();
     m_renderPass->set_viewport(nanogui::Vector2i(0, 0),
-                               nanogui::Vector2i(m_pixel_ratio * size[0],
-                                                 m_pixel_ratio * size[1]));
+                               nanogui::Vector2i(size.x(), size.y()));
     m_texture->upload((uint8_t *) m_block.data());
     m_shader->set_texture("source", m_texture);
     m_shader->begin();
